@@ -1,0 +1,8 @@
+---
+title: "hw1"
+author: "TING-YU CHANG"
+format: html
+editor: visual
+---
+
+This is the link to the repo: git@github.com:tingyuuucc/stats506-HW1.git
