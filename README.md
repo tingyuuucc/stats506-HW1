@@ -1,3 +1,3 @@
-# stats506-coursework
+# stats506-HW1
 
-This repository contains coursework and course materials for STATS 506.
+This repository contains HW1 for STATS 506.
