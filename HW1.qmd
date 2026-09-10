@@ -98,3 +98,28 @@ avg_GY[which.max(avg_GY$GY), ]
 ```
 
 ### The answer is 98R30 CE.
+
+### d. Create a table showing the average value of each quantitative variable: One row containing overall averages. One row for each season containing season-specific averages. The table should clearly identify what each row represents. (This table does not need to be “fancy” but should clearly identify what each value represents.)
+
+```{r}
+# quantitative variables
+quant_vars <- c("PH","IFP","NGP","NGL","NS","MHG","GY")
+
+# overall averages
+overall_avg <- data.frame(
+  Group = "Overall",
+  t(colMeans(soybean[quant_vars]))
+)
+
+# season-specific averages
+season_avg <- aggregate(
+  soybean[quant_vars],
+  by = list(Group = paste0("Season ", soybean$Season)),
+  FUN = mean
+)
+
+#combine into one table
+avg_table <- rbind(overall_avg, season_avg)
+
+avg_table
+```
