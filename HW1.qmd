@@ -44,7 +44,7 @@ length(unique(soybean$Season))
 table(soybean$Season)
 ```
 
-### The dataset contains 320 observations, 40 distinct cultivars, and two seasons. Each season contains 160 observations.
+The dataset contains 320 observations, 40 distinct cultivars, and two seasons. Each season contains 160 observations.
 
 ### c. Use the data to answer the following questions
 
@@ -54,7 +54,7 @@ table(soybean$Season)
 cor(soybean$PH, soybean$GY)
 ```
 
-### The correlation between plant height (PH) and grain yield (GY) is 0.1232807.
+The correlation between plant height (PH) and grain yield (GY) is 0.1232807.
 
 ### 2.Calculate the correlation between PH and GY separately for each season. Which season has the higher correlation?
 
@@ -66,7 +66,7 @@ cor(soybean$PH[soybean$Season==2],
     soybean$GY[soybean$Season==2])
 ```
 
-### Season 2 has the higher correlation.
+Season 2 has the higher correlation.
 
 ### 3.What is the grain yield of the soybean observation with the greatest plant height?
 
@@ -74,7 +74,7 @@ cor(soybean$PH[soybean$Season==2],
 soybean[soybean$PH == max(soybean$PH), c("PH","GY")]
 ```
 
-### The grain yield of the soybean observation with the greatest plant height = 3304.678.
+The grain yield of the soybean observation with the greatest plant height = 3304.678.
 
 ### 4.What percentage of observations have a thousand seed weight (MHG) greater than the overall average thousand seed weight?
 
@@ -84,7 +84,7 @@ mean_MHG <- mean(soybean$MHG)
 mean(soybean$MHG > mean_MHG) * 100
 ```
 
-### 47.1875%
+47.1875%
 
 ### 5.Which cultivar has the highest average grain yield?
 
@@ -97,7 +97,7 @@ avg_GY <- aggregate(GY ~ Cultivar,
 avg_GY[which.max(avg_GY$GY), ]
 ```
 
-### The answer is 98R30 CE.
+The answer is 98R30 CE.
 
 ### d. Create a table showing the average value of each quantitative variable: One row containing overall averages. One row for each season containing season-specific averages. The table should clearly identify what each row represents. (This table does not need to be “fancy” but should clearly identify what each value represents.)
 
@@ -123,3 +123,38 @@ avg_table <- rbind(overall_avg, season_avg)
 
 avg_table
 ```
+
+### e. Carry out a series of t-tests to examine whether the ngrain yield (GY) differs between the two seasons. State the null and the alternative hypotheses. Present the R output and interpret the results.
+
+```{r}
+# calculate GY by season
+GY1 <- soybean$GY[soybean$Season == 1]
+GY2 <- soybean$GY[soybean$Season == 2]
+
+# sample statistics
+n1 <- length(GY1)
+n2 <- length(GY2)
+
+mean1 <- mean(GY1)
+mean2 <- mean(GY2)
+
+var1 <- var(GY1)
+var2 <- var(GY2)
+
+# calculate t statistics
+t_stat <- (mean1 - mean2) / sqrt(var1 / n1 + var2 / n2)
+
+# calculate df
+df <- (var1 / n1 + var2 / n2)^2 / ((var1 / n1)^2 / (n1 - 1) + (var2 / n2)^2 / (n2 - 1))
+
+# calculate two-sided p-value
+p_value <- 2 * pt(-abs(t_stat), df = df)
+
+t_stat
+df
+p_value
+
+t.test(GY ~ Season, data = soybean)
+```
+
+Null hypothesis: $H_0: \mu_1 = \mu_2$, meaning that the mean grain yield is the same in the two seasons. Alternative hypothesis: $H_0: \mu_1 neq \mu_2$, meaning that the mean grain yield differs between the two seasons. The Welch two-sample t-test gave (t = 0.35155), (df = 231.85), and a p-value of 0.7255. Since the p-value is greater than 0.05, we fail to reject the null hypothesis. There is not sufficient evidence to conclude that the mean grain yield differs between the two seasons.
