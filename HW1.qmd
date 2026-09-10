@@ -5,6 +5,45 @@ format: html
 editor: visual
 ---
 
-This is the link to the repo: git@github.com:tingyuuucc/stats506-HW1.git
-
 ## Q1:Exploratory Analysis of Soybean Cultivars
+
+### a. Import the data into a data.frame in R. Use the dataset documentation to assign appropriate variable names. (Note: Downloading and unzipping the file can take place outside of your submitted document, but importing the file should be in the submission.)
+
+```{r}
+soybean <- read.csv("data.csv")
+
+colnames(soybean) <- c(
+  "Season",
+  "Cultivar",
+  "Repetition",
+  "PH",
+  "IFP",
+  "NLP",
+  "NGP",
+  "NGL",
+  "NS",
+  "MHG",
+  "GY"
+)
+
+```
+
+### b. Using the information provided in the dataset documentation: Verify that there are 320 observations in the dataset; 40 distinct cultivars; and all the observations were collected from two seasons. Produce a table showing the number of observations from each season.
+```{r}
+# number of obs.
+nrow(soybean)
+
+# number of distinct cultivars
+length(unique(soybean$Cultivar))
+
+# number of distinct seasons
+length(unique(soybean$Season))
+
+# number of observations from each season
+table(soybean$Season)
+```
+### The dataset contains 320 observations, 40 distinct cultivars, and two seasons. Each season contains 160 observations.
+
+###
+
+
