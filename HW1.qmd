@@ -29,6 +29,7 @@ colnames(soybean) <- c(
 ```
 
 ### b. Using the information provided in the dataset documentation: Verify that there are 320 observations in the dataset; 40 distinct cultivars; and all the observations were collected from two seasons. Produce a table showing the number of observations from each season.
+
 ```{r}
 # number of obs.
 nrow(soybean)
@@ -42,17 +43,21 @@ length(unique(soybean$Season))
 # number of observations from each season
 table(soybean$Season)
 ```
+
 ### The dataset contains 320 observations, 40 distinct cultivars, and two seasons. Each season contains 160 observations.
 
 ### c. Use the data to answer the following questions
 
 ### 1.What is the correlation between plant height (PH) and grain yield (GY)?
+
 ```{r}
 cor(soybean$PH, soybean$GY)
 ```
+
 ### The correlation between plant height (PH) and grain yield (GY) is 0.1232807.
 
 ### 2.Calculate the correlation between PH and GY separately for each season. Which season has the higher correlation?
+
 ```{r}
 cor(soybean$PH[soybean$Season==1],
     soybean$GY[soybean$Season==1])
@@ -60,23 +65,29 @@ cor(soybean$PH[soybean$Season==1],
 cor(soybean$PH[soybean$Season==2],
     soybean$GY[soybean$Season==2])
 ```
-###Season 2 has the higher correlation.
+
+### Season 2 has the higher correlation.
 
 ### 3.What is the grain yield of the soybean observation with the greatest plant height?
+
 ```{r}
 soybean[soybean$PH == max(soybean$PH), c("PH","GY")]
 ```
+
 ### The grain yield of the soybean observation with the greatest plant height = 3304.678.
 
 ### 4.What percentage of observations have a thousand seed weight (MHG) greater than the overall average thousand seed weight?
+
 ```{r}
 mean_MHG <- mean(soybean$MHG)
 # covert to %
 mean(soybean$MHG > mean_MHG) * 100
 ```
+
 ### 47.1875%
 
 ### 5.Which cultivar has the highest average grain yield?
+
 ```{r}
 # calculate average GY
 avg_GY <- aggregate(GY ~ Cultivar,
