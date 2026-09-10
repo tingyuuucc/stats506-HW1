@@ -44,6 +44,12 @@ table(soybean$Season)
 ```
 ### The dataset contains 320 observations, 40 distinct cultivars, and two seasons. Each season contains 160 observations.
 
-###
+### c. Use the data to answer the following questions:
+
+1.What is the correlation between plant height (PH) and grain yield (GY)?
+2.Calculate the correlation between PH and GY separately for each season. Which season has the higher correlation?
+3.What is the grain yield of the soybean observation with the greatest plant height?
+4.What percentage of observations have a thousand seed weight (MHG) greater than the overall average thousand seed weight?
+5.Which cultivar has the highest average grain yield?
 
 
