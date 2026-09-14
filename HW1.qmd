@@ -161,5 +161,7 @@ t.test(GY ~ Season, data = soybean)
 
 Null hypothesis: $H_0: \mu_1 = \mu_2$, meaning that the mean grain yield is the same in the two seasons. Alternative hypothesis: $H_0: \mu_1 neq \mu_2$, meaning that the mean grain yield differs between the two seasons. The Welch two-sample t-test gave (t = 0.35155), (df = 231.85), and a p-value of 0.7255. Since the p-value is greater than 0.05, we fail to reject the null hypothesis. There is not sufficient evidence to conclude that the mean grain yield differs between the two seasons.
 
+# ChatGPT helped me figure out a clearer way to show my result of e by using latex.
+
 
 
