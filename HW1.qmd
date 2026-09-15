@@ -5,6 +5,8 @@ format: html
 editor: visual
 ---
 
+This is the link to my repo on github:https://github.com/tingyuuucc/stats506-HW1
+
 ## Q1:Exploratory Analysis of Soybean Cultivars
 
 ### a. Import the data into a data.frame in R. Use the dataset documentation to assign appropriate variable names. (Note: Downloading and unzipping the file can take place outside of your submitted document, but importing the file should be in the submission.)
