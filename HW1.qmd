@@ -319,6 +319,110 @@ final
 ```
 The final sample size is 29,523 observations.
 
+## Q3:Happy Numbers
+
+### a. Write a function nextHappy() that given a positive integer, computes the next value in the happy-number sequence. Be sure to provide a reasonable error on an invalid input. Be sure to document your function.
+
+```{r}
+# compute the next value in a happy number sequence
+nextHappy <- function(n) {
+  # check that n is a single positive integer
+  if(length(n) != 1 || is.na(n) || n <= 0 || n != floor(n)) {
+    stop("input must be a positive integer")
+  }
+  
+  # split n into individual digits
+  digits <- as.numeric(strsplit(as.character(n), "")[[1]])
+  
+  # return the sum of the digits
+  sum(digits^2)
+}
+
+# demonstrate the function using the given examples
+nextHappy(19)
+nextHappy(82)
+```
+
+### b.Create a function happySequence() that returns the sequence beginning at a given number. Use your nextHappy() function to perform the calculation. Be sure to provide a reasonable error on an invalid input. Be sure to document your function.
+
+```{r}
+# generate a happy number sequence
+happySequence <- function(n) {
+  # check that n is a single positive integer
+  if(length(n) != 1 || is.na(n) || n <= 0 || n != floor(n)) {
+    stop("input must be a positive integer")
+  }
+  # start the sequence
+  sequence <- n
+  
+  # continue until the sequence reaches 1 or enters a cycle
+  while (tail(sequence, 1) != 1) {
+    # calculate the next value
+    next_value <- nextHappy(tail(sequence, 1))
+    #check the next value has already appeared
+    if(next_value %in% sequence) {
+      return(list(
+        sequence = sequence,
+        isHappy = FALSE
+      ))
+    }
+    # add the next value
+    sequence <- c(sequence, next_value)
+  }
+  # return the sequence and TRUE if reaches 1
+  return(list(
+    sequence = sequence,
+    isHappy = TRUE
+  ))
+}
+
+# demonstrate the function with a happy number
+happySequence(19)
+happySequence(4)
+```
+### c.Among integers 1 through 1000: How many are happy? What percentage are happy? What starting value produces the longest happy sequence before terminating or cycling?
+
+```{r}
+# happy number through 1 to 1000
+results <- lapply(1:1000, happySequence)
+
+# extract each starting value is happy
+is_happy <- sapply(results, function(x) x$isHappy)
+
+# count # of happy numbers
+num_happy <- sum(is_happy)
+num_happy
+
+# calculate the percentage
+per_happy <- mean(is_happy) * 100
+per_happy
+
+# calculate the sequence length for each happy number
+sequence_lengths <- sapply(
+  results,
+  function(x) {
+    if(x$isHappy) {
+      length(x$sequence)
+    } else{
+      NA
+    }
+  }
+)
+
+# find the max happy sequence length
+max_length <- max(sequence_lengths, na.rm = TRUE)
+max_length
+
+# find the starting values with the longest happy sequence
+longest_start <- which(sequence_lengths == max_length)
+longest_start
+```
+Among the integers from 1 to 1000, 143 are happy numbers, which is 14.3%. The longest happy sequence has length 7. Multiple starting values produce sequences of this maximum length, including 356, 365, 379, 397, 469, 496, 536, 563, 635, 649, 653, 694, 739, 793, 899, 937, 946, 964, 973, 989, and 998.
+
+
+
+
+
 
 
 
