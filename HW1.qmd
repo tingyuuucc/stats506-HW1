@@ -230,7 +230,7 @@ names(adult)
 ### c.Examine missing values. Report the number of missing observations for each variable.
 
 ```{r}
-# # Create a table of missing observations in each variable
+# Create a table of missing observations in each variable
 missing_table <- data.frame(
   Variable = names(adult),
   Missing = colSums(is.na(adult))
