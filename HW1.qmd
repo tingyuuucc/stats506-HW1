@@ -203,6 +203,45 @@ head(adult)
 # check structure
 str(adult)
 ```
+### b.Clean and simplify the variable names.
+
+```{r}
+names(adult) <- c(
+  "age",
+  "workclass",
+  "weight",
+  "education",
+  "educ_num",
+  "marital",
+  "occupation",
+  "relationship",
+  "race",
+  "sex",
+  "cap_gain",
+  "cap_loss",
+  "hours",
+  "country",
+  "income"
+)
+
+names(adult)
+```
+
+### c.Examine missing values. Report the number of missing observations for each variable.
+
+```{r}
+# # Create a table of missing observations in each variable
+missing_table <- data.frame(
+  Variable = names(adult),
+  Missing = colSums(is.na(adult))
+)
+
+# Display the number
+missing_table
+```
+Missing values are present in 'workclass', 'occupation', and 'country', with 1836,1843, and 583 missing observations, respectively.
+
+
 
 
 
