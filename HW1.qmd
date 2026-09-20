@@ -266,6 +266,60 @@ sample_size
 ```
 The sample size decrease from 32561 to 32103 after restricting. A total of 458 observations were removed by this restriction.
 
+### e. Remove observations with missing values for occupation, workclass, or native country. Explain why.
+
+```{r}
+# check the sample size
+n_before_missing <- nrow(adult)
+
+# remove obs. with missing values in occupation, workclass, or country
+adult <- adult[
+  complete.cases(adult[, c("occupation", "workclass", "country")]),
+]
+
+# check the sample size after removing missing values
+n_after_missing <- nrow(adult)
+
+# display the sample size
+n_before_missing
+n_after_missing
+```
+
+After removing observations with missing values in occupation, workclass, or country, the sample size decreased from 32,103 to 29,873. A total of 2,230 observations were removed. Observations with missing value were removed to ensure complete information for the variables used in the analysis. 
+
+### "https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/complete.cases" helped me figure out a more efficient way to code my loop for problem 2 by doing 'complete.cases'. 
+
+### f.Eliminate any observations with: age less than 18, age greater than 90, education level identified as Preschool.
+
+```{r}
+# check the sample size 
+n_before_filter <- nrow(adult)
+
+# remove obs. with age below 18, age above 90, or education level equal to Preschool
+adult <- adult[
+  adult$age >= 18 &
+  adult$age <= 90 &
+  adult$education != "Preschool",
+]
+
+# check the sample size after filtering
+n_after_filter <- nrow(adult)
+
+# display
+n_before_filter
+n_after_filter
+```
+After removing observations with age less than 18, age greater than 90, or education level equal to Preschool, the sample size decreased from 29,873 to 29,523.
+
+### g. Report your final sample size.
+
+```{r}
+final <- nrow(adult)
+final
+```
+The final sample size is 29,523 observations.
+
+
 
 
 
