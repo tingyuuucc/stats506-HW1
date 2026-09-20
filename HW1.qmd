@@ -230,16 +230,42 @@ names(adult)
 ### c.Examine missing values. Report the number of missing observations for each variable.
 
 ```{r}
-# Create a table of missing observations in each variable
+# create a table of missing observations in each variable
 missing_table <- data.frame(
   Variable = names(adult),
   Missing = colSums(is.na(adult))
 )
 
-# Display the number
+# display the number
 missing_table
 ```
 Missing values are present in 'workclass', 'occupation', and 'country', with 1836,1843, and 583 missing observations, respectively.
+
+### d. Restrict the sample to individuals working at least 10 hours per week. Confirm the sample size before and after filtering.
+
+```{r}
+# check the sample size
+n_before <- nrow(adult)
+n_before
+
+# restrict the sample
+adult <- adult[adult$hours >= 10, ]
+
+# check the sample size after filtering
+n_after <- nrow(adult)
+n_after
+
+# create the table showing the sample size before and after
+sample_size <- data.frame(
+  Stage = c("Before", "After filtering"),
+  Sample_Size = c(n_before, n_after)
+)
+
+# display the table
+sample_size
+```
+The sample size decrease from 32561 to 32103 after restricting. A total of 458 observations were removed by this restriction.
+
 
 
 
