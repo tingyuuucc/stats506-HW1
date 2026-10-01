@@ -1,0 +1,188 @@
+---
+title: "Datasci506_hw2"
+author: "TING-YU CHANG"
+format: html
+editor: visual
+---
+
+This is the link to my repo on github:https://github.com/tingyuuucc/stats506-HW1
+
+## Problem 1: Random Walk with Momentum
+
+### a. Simulation function:
+```{r}
+momentum_walk <- function(n, p) {
+  # check n is a single positive integer
+  if(length(n) != 1 || is.na(n) || !is.numeric(n) ||
+     n <= 0 || n != floor(n)) {
+    stop("n must be a positive integer.")
+  }
+  
+  # check p is a single number between 0 and 1
+  if (length(p) != 1 || is.na(p) || !is.numeric(p) ||
+      p < 0 || p > 1) {
+    stop("p must be a number between 0 and 1.")
+  }
+  
+  # define 4 posiible directions
+  directions <- matrix(
+    c(1, 0,    # right
+      -1, 0,   # left
+      0, 1,    # up
+      0, -1),  # down
+    ncol = 2,
+    byrow = TRUE
+  )
+  # start at origin
+  position <- c(0,0)
+  
+  # choose 1st direction
+  pre_direction <- sample(1:4, 1)
+  
+  # first step
+  position <- position + directions[pre_direction, ]
+  
+  # remaining steps
+  if (n > 1) {
+    for (i in 2:n) {
+      if (runif(1) < p) {
+        current_direction <- pre_direction
+      } else {
+        current_direction <- sample(1:4, 1)
+      }
+      position <- position + directions[current_direction, ]
+      pre_direction <- current_direction
+    }
+  }
+  return(position)
+}
+```
+
+```{r}
+momentum_walk(10, 0.6)
+momentum_walk(10, 0.6)
+```
+
+### b. Implement the simulation
+
+### version 1
+```{r}
+momentum_walk1 <- function(n, p) {
+  if (length(n) != 1 || is.na(n) || !is.numeric(n) ||
+      n <= 0 || n != floor(n)) {
+    stop("n must be a positive integer.")
+  }
+  
+  if (length(p) != 1 || is.na(p) || !is.numeric(p) ||
+      p < 0 || p > 1) {
+    stop("p must be a number between 0 and 1.")
+  }
+  
+  directions <- matrix(
+    c(1, 0,
+     -1, 0,
+      0, 1,
+      0, -1),
+    ncol = 2,
+    byrow = TRUE
+  )
+  
+  position <- c(0, 0)
+  
+  prev_direction <- sample(1:4, 1)
+  position <- position + directions[prev_direction, ]
+  
+  if (n > 1) {
+    for (i in 2:n) {
+      
+      # preserve the previous direction with probability p
+      if (runif(1) < p) {
+        current_direction <- prev_direction
+      } else {
+        current_direction <- sample(1:4, 1)
+      }
+      position <- position + directions[current_direction, ]
+      prev_direction <- current_direction
+    }
+  }
+  
+  return(position)
+}
+```
+
+### version 2
+
+```{r}
+momentum_walk2 <- function(n, p) {
+  
+  if (length(n) != 1 || is.na(n) || !is.numeric(n) ||
+      n <= 0 || n != floor(n)) {
+    stop("n must be a positive integer.")
+  }
+
+  if (length(p) != 1 || is.na(p) || !is.numeric(p) ||
+      p < 0 || p > 1) {
+    stop("p must be a number between 0 and 1.")
+  }
+  
+  directions <- matrix(
+    c(1, 0,
+     -1, 0,
+      0, 1,
+      0, -1),
+    ncol = 2,
+    byrow = TRUE
+  )
+  
+  first_direction <- sample(1:4, 1)
+  previous_direction <- first_direction
+  
+  if (n > 1) {
+    
+    remaining_directions <- sapply(seq_len(n - 1), function(i) {
+      
+      if (runif(1) < p) {
+        current_direction <- previous_direction
+      } else {
+        current_direction <- sample(1:4, 1)
+      }
+      
+      previous_direction <<- current_direction
+      
+      return(current_direction)
+    })
+    
+    # combine all step directions
+    step_directions <- c(first_direction, remaining_directions)
+    
+  } else {
+    step_directions <- first_direction
+  }
+  
+  # add all step to obtain the final position
+  final_position <- colSums(directions[step_directions, , drop = FALSE])
+  
+  return(final_position)
+}
+```
+
+```{r}
+# demonstrate the loop version
+momentum_walk1(10, 0.6)
+
+# demonstrate the apply version
+momentum_walk2(10, 0.6)
+
+# demonstrate both functions with 1000 steps
+momentum_walk1(1000, 0.6)
+momentum_walk2(1000, 0.6)
+```
+### momentum_walk1() uses a for loop to generate each step and update the position. momentum_walk2() uses sapply() to generate the sequence of directions, then sums the corresponding movements to obtain the final position.
+
+### ChatGPT helped me figure out a more briefly way to show my result.
+
+
+
+
+
+
