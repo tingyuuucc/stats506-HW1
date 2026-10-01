@@ -255,6 +255,33 @@ results
 ```
 ### The mean final distance increases substantially as p increases, from about 28.06 at p = 0 to about 123.15 at p = 0.9. This suggests that stronger momentum leads to greater displacement from the starting point on average.
 
+## Problem 2:Monte Carlo Simulation of Campus Bus Arrivals
+
+```{r}
+set.seed(123)
+
+# simulated days
+n_days <- 1000
+
+# simulate passenger counts
+morning <- rowSums(matrix(rpois(n_days * 3, lambda = 4), nrow = n_days))
+
+p_9 <- rnorm(n_days, mean = 45, sd = 4)
+
+midday <- rowSums(matrix(rpois(n_days * 6, lambda = 15), nrow = n_days))
+
+peak_16 <- rnorm(n_days, mean = 55, sd = 5)
+
+evening <- rowSums(matrix(rpois(n_days * 6, lambda = 9), nrow = n_days))
+
+total_passengers <- morning + p_9 + midday + peak_16 + evening
+
+mean(total_passengers)
+```
+### Using 10,000 simulated days, the estimated average total number of passengers per day is 256.22.
+
+
+
 
 
 
