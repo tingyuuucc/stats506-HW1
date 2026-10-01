@@ -314,8 +314,64 @@ par(mfrow = c(2,3))
 
 hist(youtube_clean$view_count,
      main = "View Count",
-     xlab = "")
+     xlab = "View Count")
+
+hist(youtube_clean$like_count,
+     main = "Like Count",
+     xlab = "LIke Count")
+
+hist(youtube_clean$dislike_count,
+     main = "Dislike Count",
+     xlab = "Dislike Count")
+
+hist(youtube_clean$favorite_count,
+     main = "Favorite Count",
+     xlab = "Favorite Count")
+
+hist(youtube_clean$comment_count,
+     main = "Comment Count",
+     xlab = "Comment Count")
+
+summary(youtube_clean[, c(
+  "view_count",
+  "like_count",
+  "dislike_count",
+  "favorite_count",
+  "comment_count"
+)])
+
+# transform right-skewed engagement variables
+youtube_clean$log_view_count <- log(youtube_clean$view_count + 1)
+youtube_clean$log_like_count <- log(youtube_clean$like_count + 1)
+youtube_clean$log_dislike_count <- log(youtube_clean$dislike_count + 1)
+youtube_clean$log_comment_count <- log(youtube_clean$comment_count + 1)
+
+# examine distributions after log transformation
+par(mfrow = c(2, 2))
+
+hist(youtube_clean$log_view_count,
+     main = "Log View Count",
+     xlab = "log(view_count + 1)")
+
+hist(youtube_clean$log_like_count,
+     main = "Log Like Count",
+     xlab = "log(like_count + 1)")
+
+hist(youtube_clean$log_dislike_count,
+     main = "Log Dislike Count",
+     xlab = "log(dislike_count + 1)")
+
+hist(youtube_clean$log_comment_count,
+     main = "Log Comment Count",
+     xlab = "log(comment_count + 1)")
 ```
+### view_count, like_count, dislike_count, and comment_count are strongly right-skewed, so I transformed them using log(x + 1) before using them as outcomes in linear regression. favorite_count is not appropriate as an outcome because it has essentially no variation, with all observed values equal to zero.
+
+### ChatGPT helped me figure out a clearer way to show my result by using log.
+
+
+
+
 
 
 
