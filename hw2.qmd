@@ -369,6 +369,76 @@ hist(youtube_clean$log_comment_count,
 
 ### ChatGPT helped me figure out a clearer way to show my result by using log.
 
+## c.Fitting linear regression models
+
+```{r}
+# define the transformed outcomes
+outcomes <- c(
+  "log_view_count",
+  "log_like_count",
+  "log_dislike_count",
+  "log_comment_count"
+)
+
+# define 7 binary
+characteristics <- c(
+  "funny",
+  "show_product_quickly",
+  "patriotic",
+  "celebrity",
+  "danger",
+  "animals",
+  "use_sex"
+)
+
+results <- do.call(rbind, lapply(outcomes, function(y) {
+  do.call(rbind, lapply(characteristics, function(x) {
+    # fit the model with year as a continuous 
+    model <- lm(
+      reformulate(c(x, "year"), response = y),
+      data = youtube_clean
+    )
+    
+    # extract the coefficient and p-value for the commercial characteristic
+    coef_table <- coef(summary(model))
+    
+    data.frame(
+      outcome = y,
+      characteristic = x,
+      estimate = coef_table[2, "Estimate"],
+      p_value = coef_table[2, "Pr(>|t|)"]
+    )
+  }))
+}))
+
+results
+```
+
+```{r}
+# identify statistically significant associations
+significant_results <- results[results$p_value < 0.05, ]
+
+# determine the direction
+significant_results$direction <- ifelse(
+  significant_results$estimate > 0,
+  "Positive",
+  "Negative"
+)
+
+significant_results
+```
+### At the 0.05 significance level, none of the 7 commercial characteristics had a statistically significant association with any of the engagement outcomes after adjusting for year. Therefore, there are no statistically significant positive or negative associations to report.
+
+```{r}
+view_results <- results[
+  results$outcome == "log_view_count",
+]
+
+view_results[which.max(view_results$estimate), ]
+```
+### danger had the largest positive estimated association with view counts, with an estimated coefficient of 0.667.
+
+
 
 
 
