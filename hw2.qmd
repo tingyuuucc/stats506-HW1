@@ -438,6 +438,45 @@ view_results[which.max(view_results$estimate), ]
 ```
 ### danger had the largest positive estimated association with view counts, with an estimated coefficient of 0.667.
 
+## d. Estimating regression coefficients using matrix algebra
+
+```{r}
+dat <- youtube_clean[
+  complete.cases(youtube_clean[, c("log_view_count", "danger", "year")]),
+]
+
+# construct the response vector
+y <- dat$log_view_count
+
+# construct the design matrix with an intercept
+X <- cbind(
+  Intercept = 1,
+  danger = dat$danger,
+  year = dat$year
+)
+
+# estimate regression coefficients using matrix algebra
+beta_hat <- solve(t(X) %*% X) %*% t(X) %*% y
+
+beta_hat
+```
+```{r}
+model_lm <-  lm(
+  log_view_count ~ danger + year,
+  data = dat
+)
+
+coef(model_lm)
+
+#compare the two sets of coeff
+cbind(
+  Matrix = as.vector(beta_hat),
+  LM = coef(model_lm)
+)
+```
+### The coefficients obtained using the matrix formula and lm() are identical up to numerical precision.
+
+
 
 
 
