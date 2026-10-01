@@ -280,6 +280,44 @@ mean(total_passengers)
 ```
 ### Using 10,000 simulated days, the estimated average total number of passengers per day is 256.22.
 
+## Problem 3: Linear Regression
+
+### a.
+```{r}
+# import data
+youtube <- read.csv(
+  "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv"
+)
+
+# remove variables
+youtube_clean <- youtube[, !names(youtube) %in% c(
+  "brand",
+  "superbowl_ads_dot_com_url",
+  "youtube_url",
+  "id",
+  "etag",
+  "published_at",
+  "title",
+  "description",
+  "thumbnail",
+  "channel_title"
+)]
+
+dim(youtube_clean)
+```
+### After removing variables that could identify a specific commercial, the resulting dataset contains 247 observations and 15 variables.
+
+### b.
+
+```{r}
+par(mfrow = c(2,3))
+
+hist(youtube_clean$view_count,
+     main = "View Count",
+     xlab = "")
+```
+
+
 
 
 
