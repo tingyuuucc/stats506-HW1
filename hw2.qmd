@@ -181,6 +181,82 @@ momentum_walk2(1000, 0.6)
 
 ### ChatGPT helped me figure out a more briefly way to show my result.
 
+### c. Reproducibility
+
+```{r}
+set.seed(123)
+momentum_walk1(10, 0.6)
+
+# run again
+set.seed(123)
+momentum_walk1(10, 0.6)
+
+# n = 1000
+set.seed(123)
+momentum_walk1(1000, 0.6)
+
+set.seed(123)
+momentum_walk1(1000, 0.6)
+```
+### I used set.seed(123) before each simulation. Setting the same seed resets R's random-number generator to the same starting state, so the same sequence of random numbers is generated and the simulation produces the same result each time.
+
+### d. Does momentum matter?
+
+### i.
+
+```{r}
+set.seed(123)
+p_values <- c(0, 0.5, 0.9)
+
+final <- sapply(
+  p_values,
+  function(p) momentum_walk1(1000, p)
+)
+
+# calculate final fro the orign
+distances <- sqrt(colSums(final^2))
+
+results <- data.frame(
+  p = p_values,
+  x = final[1, ],
+  y = final[2, ],
+  distance = distances
+)
+
+results
+```
+### ii. In this simulation, the final distance increases as the momentum probability increases. The distances are 16.49 for p = 0, 82.28 for p = 0.5, and 105.12 for p = 0.9.
+
+### iii. Higher momentum makes the particle more likely to continue moving in the same direction, so it tends to travel farther from the starting point.
+
+### e. Monte Carlo simulation
+
+```{r}
+set.seed(123)
+
+p_values <- c(0, 0.25, 0.5, 0.75, 0.9)
+
+# calculate mean final distance
+mean_distance <- sapply(p_values, function(p) {
+  distances <- replicate(1000,{
+    position <- momentum_walk1(1000, p)
+    sqrt(position[1]^2 + position[2]^2)
+  })
+  mean(distances)
+})
+
+# create a table
+results <- data.frame(
+  p = p_values,
+  mean_distance = mean_distance
+)
+
+results
+```
+### The mean final distance increases substantially as p increases, from about 28.06 at p = 0 to about 123.15 at p = 0.9. This suggests that stronger momentum leads to greater displacement from the starting point on average.
+
+
+
 
 
 
