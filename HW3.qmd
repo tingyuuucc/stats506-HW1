@@ -1,0 +1,38 @@
+---
+title: "HW3"
+author: "TING-YU CHANG"
+format: pdf
+editor: visual
+---
+
+## Problem 1
+
+### a.
+
+```{r}
+library(foreign)
+
+# read the data
+aux <- read.xport("AUX_I.xpt")
+dem <- read.xport("DEMO_I.xpt")
+
+# merge the data
+merged <- merge(aux, dem, by = "SEQN", all = FALSE)
+
+names(merged) <- tolower(names(merged))
+dim(merged)
+```
+
+### b.
+
+```{r}
+table(merged$riagendr, useNA = 'ifany')
+
+# rename
+names(merged)[names(merged) == "riagendr"] <- "female"
+
+# convert to 1/0
+merged$female <- merged$female - 1 
+table(merged$female, useNA = 'ifany')
+```
+gender : no missing value, rename, no need to make binary variables factors.
