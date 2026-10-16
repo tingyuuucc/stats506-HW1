@@ -35,4 +35,5 @@ names(merged)[names(merged) == "riagendr"] <- "female"
 merged$female <- merged$female - 1 
 table(merged$female, useNA = 'ifany')
 ```
+
 gender : no missing value, rename, no need to make binary variables factors.
