@@ -538,8 +538,110 @@ microbenchmark(
   }
 )
 ```
+## Problem 3
 
+```{r}
+dat <- read.csv("au-500.csv")
+```
 
+### a. What percentage of the websites are .com’s (as opposed to .net, .com.au, etc)?
+```{r}
+com_per <- mean(grepl("\\.com$", dat$web)) * 100
+
+com_per
+```
+No websites end in .com.
+
+### b. What is the most common domain name amongst the email addresses? 
+```{r}
+# extract domain name
+domains <- gsub(".*@", "", dat$email)
+
+# the most common domain
+domain_counts <- sort(table(domains), decreasing = TRUE)
+domain_counts[1]
+```
+The most common email domain is hotmail.com, which appears 114 times.
+
+### c. What proportion of company names contain a non-alphabetic character, excluding commas and whitespace.
+```{r}
+prop_nonalpha <- mean(
+  grepl("[^a-zA-Z, ]", dat$company_name)
+)
+
+prop_nonalpha
+```
+9% of company names contain a non-alphabetic character after excluding commas and whitespace.
+
+```{r}
+# exclude ampersands from non-alphabetic characters
+prop_nonalpha_no_amp <- mean(
+  grepl("[^a-zA-Z,& ]", dat$company_name)
+)
+
+prop_nonalpha_no_amp
+```
+The proportion decreases from 9% to 0.8% when ampersands are also excluded.
+
+### d. 
+```{r}
+head(dat[, c("phone1", "phone2")], 10)
+
+# remove dashes
+phone1_dig <- paste0(
+  substr(dat$phone1, 1, 2),
+  substr(dat$phone1, 4, 7),
+  substr(dat$phone1, 9, 12)
+)
+
+dat$phone1 <- paste0(
+  substr(phone1_dig, 1, 4),
+  "-",
+  substr(phone1_dig, 5, 7),
+  "-",
+  substr(phone1_dig, 8, 10)
+)
+
+# display the first 10 phone numbers
+head(dat[, c("phone1", "phone2")], 10)
+```
+### e. Produce a histogram of the log of the apartment numbers for all addresses.
+
+```{r}
+# address that end in a number
+apt <- dat$address[
+  grepl("[0-9]+$", dat$address)
+]
+
+# extract the number at the end of each address
+apt_nums <- regmatches(
+  apt,
+  regexpr("[0-9]+$", apt)
+)
+
+# convert apt nums to numeric
+apartment_numbers <- as.numeric(apt_nums)
+
+hist(
+  log(apartment_numbers),
+  main = "Log of Apartment Numbers",
+  xlab = "log(Apartment Number)"
+)
+```
+### f. Examine whether the apartment numbers appear to follow Benford’s law. Do you think the apartment numbers would pass as real data?
+
+```{r}
+# extract the leading digit 
+leading_digit <- substr(
+  apartment_numbers,
+  1,
+  1
+)
+
+# count the leading digits
+table(leading_digit)
+```
+The leading digits of the apartment numbers appear approximately uniformly distributed rather than decreasing as predicted by Benford's law. Therefore, the apartment numbers do not appear to follow Benford's law and would not be convincing as real-world numerical data.
 
 
 
