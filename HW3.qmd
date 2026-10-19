@@ -185,6 +185,35 @@ knitr::kable(
   caption = "Model Fit Statistics"
 )
 ```
+### d.
+
+```{r}
+# calculate IRR for females relative to males
+exp(mod2l$coef["female"])
+
+# p-value
+summary(mod2l)$coef["female", "Pr(>|z|)"]
+```
+Strong evidence of an effect on the IRR scale. The incidence risk ratio differs between males and females. Females have a slightly higher expected Tympanometric width than males, after adjusting for citizenship, number of young children, and household income.
+
+```{r}
+library(emmeans)
+
+# estimate the predicted Tympanometric width for males and females
+gender_emm <- emmeans(
+  mod2l,
+  ~ female,
+  type = "response"
+)
+
+gender_emm
+
+# test the diff
+pairs(gender_emm)
+```
+The comparison has a p-value less than 0.0001, indicating strong evidence that the predicted left-ear Tympanometric width differs between males and females. Females have a higher predicted value than males. Both analyses provide strong evidence of a gender difference.
+
+
 
 
 
