@@ -25,15 +25,68 @@ dim(merged)
 
 ### b.
 
+1. gender
 ```{r}
 table(merged$riagendr, useNA = 'ifany')
 
 # rename
 names(merged)[names(merged) == "riagendr"] <- "female"
 
-# convert to 1/0
-merged$female <- merged$female - 1 
+# convert to 0 = male and 1 = female
+merged$female <- merged$female - 1
+
+# create a table
 table(merged$female, useNA = 'ifany')
 ```
-
 gender : no missing value, rename, no need to make binary variables factors.
+
+2. citizenship status
+```{r}
+table(merged$dmdcitzn, useNA = 'ifany')
+
+# convert invalid or missing to NA
+merged$dmdcitzn[merged$dmdcitzn > 3] <- NA
+
+# convert to a factor
+merged$dmdcitzn <- as.factor(merged$dmdcitzn)
+levels(merged$dmdcitzn) <- c(
+  "Citizen",
+  "Not a citizen"
+)
+
+# rename
+names(merged)[names(merged) == "dmdcitzn"] <- "citizenship"
+
+table(merged$citizenship, useNA = "ifany")
+```
+3. # of children
+```{r}
+# rename
+names(merged)[names(merged) == "dmdhhsza"] <- "numchild"
+
+table(merged$numchild, useNA = "ifany")
+```
+
+4. annual household income
+```{r}
+table(merged$indhhin2, useNA = 'ifany')
+
+# convert refused, dk, and overlapping income categories to NA
+merged$indhhin2[
+  merged$indhhin2 > 15 |
+  merged$indhhin2 %in% c(12, 13)
+] <- NA
+
+# rename
+names(merged)[names(merged) == "indhhin2"] <- "hhinc"
+
+merged$hhinc[merged$hhinc == 14] <- 11
+merged$hhinc[merged$hhinc == 15] <- 12
+table(merged$hhinc, useNA = 'ifany')
+
+# check the cleaned variable
+table(merged$hhinc, useNA = "ifany")
+```
+
+
+
