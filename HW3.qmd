@@ -88,5 +88,105 @@ table(merged$hhinc, useNA = 'ifany')
 table(merged$hhinc, useNA = "ifany")
 ```
 
+### c.
+
+```{r}
+# 1R - Right ear: gender
+mod1r <- glm(
+  auxtwidr ~ female,
+  data = merged,
+  family = poisson
+)
+
+# 2R - Right ear: gender, citizenship status, number of children, annual household income
+mod2r <- glm(
+  auxtwidr ~ female + citizenship + numchild + hhinc,
+  data = merged,
+  family = poisson
+)
+
+# 1L - Left ear: gender
+mod1l <- glm(
+  auxtwidl ~ female,
+  data = merged,
+  family = poisson
+)
+
+# 2L - Left ear: gender, citizenship status, number of children, annual household income
+mod2l <- glm(
+  auxtwidl ~ female + citizenship + numchild + hhinc,
+  data = merged,
+  family = poisson
+)
+
+# combine coefficients
+coef_table <- cbind(
+  c(coef(mod1r), rep(NA, length(coef(mod2r)) - length(coef(mod1r)))),
+  coef(mod2r),
+  c(coef(mod1l), rep(NA, length(coef(mod2l)) - length(coef(mod1l)))),
+  coef(mod2l)
+)
+
+# convert to IRR
+coef_table <- exp(coef_table)
+
+rownames(coef_table) <- names(coef(mod2l))
+colnames(coef_table) <- c(
+  "Model 1R",
+  "Model 2R",
+  "Model 1L",
+  "Model 2L"
+)
+
+coef_table <- round(coef_table, 3)
+mode(coef_table) <- "character"
+coef_table[is.na(coef_table)] <- ""
+
+# display a formatted table
+knitr::kable(
+  coef_table,
+  align = "cccc",
+  caption = "Incidence Risk Ratios for Poisson Regression Models"
+)
+```
+```{r}
+library(pscl)
+
+# calculate model summary stat
+calc_stat <- function(model) {
+  c(
+    "Sample size" = length(model$fitted.values),
+    "Pseudo R^2" = unname(pR2(model)["McFadden"]),
+    "AIC" = AIC(model)
+  )
+}
+
+# combine
+fit_table <- cbind(
+  calc_stat(mod1r),
+  calc_stat(mod2r),
+  calc_stat(mod1l),
+  calc_stat(mod2l)
+)
+
+# add col name
+colnames(fit_table) <- c(
+  "Model 1R",
+  "Model 2R",
+  "Model 1L",
+  "Model 2L"
+)
+
+fit_table <- round(fit_table, 3)
+
+knitr::kable(
+  fit_table,
+  align = "cccc",
+  caption = "Model Fit Statistics"
+)
+```
+
+
+
 
 
