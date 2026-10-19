@@ -431,6 +431,113 @@ microbenchmark(
 ```
 The single SQL query was much faster than the R approach. Based on the median execution times, the SQL approach was approximately 16 times faster.
 
+### c. Identify the name(s) of the film(s) which was/were rented for the highest dollar value. (Assume all costs are in USD regardless of country.) 
+
+R
+```{r}
+# extract the required tables
+payment <- dbGetQuery(sakila, "SELECT * FROM payment")
+rental <- dbGetQuery(sakila, "SELECT * FROM rental")
+inventory <- dbGetQuery(sakila, "SELECT * FROM inventory")
+film <- dbGetQuery(sakila, "SELECT * FROM film")
+
+# find the rentals with the highest payment amount
+max_payment <- max(payment$amount)
+
+rental_ids <- payment$rental_id[
+  payment$amount == max_payment
+]
+
+# find the corresponding inventory IDs
+inventory_ids <- rental$inventory_id[
+  rental$rental_id %in% rental_ids
+]
+
+# find the corresponding film IDs
+film_ids <- inventory$film_id[
+  inventory$inventory_id %in% inventory_ids
+]
+
+# find the film titles
+film_R <- unique(
+  film$title[film$film_id %in% film_ids]
+)
+
+film_R
+```
+SQL
+```{r}
+film_SQL <- dbGetQuery(
+  sakila,
+  "
+  SELECT DISTINCT f.title
+  FROM payment AS p
+  JOIN rental AS r
+    ON p.rental_id = r.rental_id
+  JOIN inventory AS i
+    ON r.inventory_id = i.inventory_id
+  JOIN film AS f
+    ON i.film_id = f.film_id
+  WHERE p.amount = (
+    SELECT MAX(amount)
+    FROM payment
+  )
+  ORDER BY f.title
+  "
+)
+
+film_SQL
+```
+compare timing
+```{r}
+microbenchmark(
+  R = {
+    payment <- dbGetQuery(sakila, "SELECT * FROM payment")
+    rental <- dbGetQuery(sakila, "SELECT * FROM rental")
+    inventory <- dbGetQuery(sakila, "SELECT * FROM inventory")
+    film <- dbGetQuery(sakila, "SELECT * FROM film")
+    
+    max_payment <- max(payment$amount)
+    
+    rental_ids <- payment$rental_id[
+      payment$amount == max_payment
+    ]
+    
+    inventory_ids <- rental$inventory_id[
+      rental$rental_id %in% rental_ids
+    ]
+    
+    film_ids <- inventory$film_id[
+      inventory$inventory_id %in% inventory_ids
+    ]
+    
+    unique(
+      film$title[film$film_id %in% film_ids]
+    )
+  },
+  
+  SQL = {
+    dbGetQuery(
+      sakila,
+      "
+      SELECT DISTINCT f.title
+      FROM payment AS p
+      JOIN rental AS r
+        ON p.rental_id = r.rental_id
+      JOIN inventory AS i
+        ON r.inventory_id = i.inventory_id
+      JOIN film AS f
+        ON i.film_id = f.film_id
+      WHERE p.amount = (
+        SELECT MAX(amount)
+        FROM payment
+      )
+      ORDER BY f.title
+      "
+    )
+  }
+)
+```
 
 
 
