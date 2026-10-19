@@ -213,6 +213,224 @@ pairs(gender_emm)
 ```
 The comparison has a p-value less than 0.0001, indicating strong evidence that the predicted left-ear Tympanometric width differs between males and females. Females have a higher predicted value than males. Both analyses provide strong evidence of a gender difference.
 
+## Problem 2
+
+```{r}
+library(DBI)
+library(RSQLite)
+library(microbenchmark)
+
+sakila <- dbConnect(
+  RSQLite::SQLite(),
+  "sakila_master.db"
+)
+
+# check the table
+dbListTables(sakila)
+```
+### a. For each store, how many customers does that store have, and what percentage of customers of that store are active in the system?
+
+R
+```{r}
+# extract customer table
+customer <- dbGetQuery(
+  sakila,
+  "SELECT * FROM customer"
+)
+
+# the # of customers in each store
+total_customers <- tapply(
+  customer$active,
+  customer$store_id,
+  length
+)
+
+# the percentage of active customers in each store
+active_percent <- tapply(
+  as.numeric(customer$active),
+  customer$store_id,
+  mean
+) * 100
+
+customer_R <- data.frame(
+  store_id = as.numeric(names(total_customers)),
+  total_customers = as.numeric(total_customers),
+  active_percent = as.numeric(active_percent)
+)
+
+customer_R
+```
+SQL
+
+```{r}
+customer_SQL <- dbGetQuery(
+  sakila,
+  "
+  SELECT store_id,
+         COUNT(*) AS total_customers,
+         100.0 * AVG(active) AS active_percent
+  FROM customer
+  GROUP BY store_id
+  "
+)
+
+customer_SQL
+```
+compare timing
+```{r}
+microbenchmark(
+  R = {
+    customer <- dbGetQuery(
+      sakila,
+      "SELECT * FROM customer"
+    )
+    
+    total_customers <- tapply(
+      customer$active,
+      customer$store_id,
+      length
+    )
+    
+    active_percent <- tapply(
+      as.numeric(customer$active),
+      customer$store_id,
+      mean
+    ) * 100
+    
+    data.frame(
+      store_id = as.numeric(names(total_customers)),
+      total_customers = as.numeric(total_customers),
+      active_percent = as.numeric(active_percent)
+    )
+  },
+  
+  SQL = {
+    dbGetQuery(
+      sakila,
+      "
+      SELECT store_id,
+             COUNT(*) AS total_customers,
+             100.0 * AVG(active) AS active_percent
+      FROM customer
+      GROUP BY store_id
+      "
+    )
+  }
+)
+```
+The SQL approach was faster than the R approach. Based on the median execution times, the SQL query was approximately five times faster.
+
+### b. Generate a table identifying the names and country of each staff member.
+
+R
+```{r}
+# extract required table
+staff <- dbGetQuery(sakila, "SELECT * FROM staff")
+address <- dbGetQuery(sakila, "SELECT * FROM address")
+city <- dbGetQuery(sakila, "SELECT * FROM city")
+country <- dbGetQuery(sakila, "SELECT * FROM country")
+
+# merge staff with address
+staff_address <- merge(
+  staff,
+  address,
+  by = "address_id"
+)
+
+# merge with city
+staff_city <- merge(
+  staff_address,
+  city,
+  by = "city_id"
+)
+
+# merge with country
+staff_country <- merge(
+  staff_city,
+  country,
+  by = "country_id"
+)
+
+# only staff names and country
+staff_R <- staff_country[
+  ,
+  c("first_name", "last_name", "country")
+]
+
+staff_R
+
+```
+SQL
+```{r}
+staff_SQL <- dbGetQuery(
+  sakila,
+  "
+  SELECT s.first_name,
+         s.last_name,
+         co.country
+  FROM staff AS s
+  JOIN address AS a
+    ON s.address_id = a.address_id
+  JOIN city AS ci
+    ON a.city_id = ci.city_id
+  JOIN country AS co
+    ON ci.country_id = co.country_id
+  "
+)
+
+staff_SQL
+```
+compare timing
+```{r}
+microbenchmark(
+  R = {
+    staff <- dbGetQuery(sakila, "SELECT * FROM staff")
+    address <- dbGetQuery(sakila, "SELECT * FROM address")
+    city <- dbGetQuery(sakila, "SELECT * FROM city")
+    country <- dbGetQuery(sakila, "SELECT * FROM country")
+    
+    staff_address <- merge(
+      staff, address,
+      by = "address_id"
+    )
+    
+    staff_city <- merge(
+      staff_address, city,
+      by = "city_id"
+    )
+    
+    staff_country <- merge(
+      staff_city, country,
+      by = "country_id"
+    )
+    
+    staff_country[
+      ,
+      c("first_name", "last_name", "country")
+    ]
+  },
+  
+  SQL = {
+    dbGetQuery(
+      sakila,
+      "
+      SELECT s.first_name,
+             s.last_name,
+             co.country
+      FROM staff AS s
+      JOIN address AS a
+        ON s.address_id = a.address_id
+      JOIN city AS ci
+        ON a.city_id = ci.city_id
+      JOIN country AS co
+        ON ci.country_id = co.country_id
+      "
+    )
+  }
+)
+```
+The single SQL query was much faster than the R approach. Based on the median execution times, the SQL approach was approximately 16 times faster.
+
 
 
 
