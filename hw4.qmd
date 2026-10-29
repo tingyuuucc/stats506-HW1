@@ -110,12 +110,23 @@ winners <- tennis %>%
   filter(wins > 1)
 winners %>%
   nrow()
+
+winners %>%
+  slice(1:2)
 ```
-There are 17 players who won multiple tournaments.
+There are 17 players who won multiple tournaments. And Rafael Nadal won the most, 9 tournaments.
+
+### c. Is there any evidence that winners have more aces than losers? (If you address this with a hypothesis test, do not use base R functionality - continue to remain in the Tidyverse.)
 
 ```{r}
-
+library(tidymodels)
+tennis %>%
+  select(w_ace, l_ace) %>%
+  mutate(win_more = w_ace > l_ace) %>%
+  prop_test(win_more ~ NULL, p = 0.5)
 ```
+Yes, we have statistical significant evidence that winners perform more aces than losers.
 
+### d. Identify the player(s) with the highest win-rate. (Note that this is NOT asking for the highest number of wins.) Restrict to players with at least 5 matches.
 
 
