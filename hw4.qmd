@@ -20,7 +20,7 @@ nzge %>%
   ungroup() %>%
   arrange(desc(votes))
 ```
-b. Focus only on the 2014 election. Report the proportion of votes for each party in the Candidate election. Again, produce a nice table and sort it by percent of vote.
+### b. Focus only on the 2014 election. Report the proportion of votes for each party in the Candidate election. Again, produce a nice table and sort it by percent of vote.
 
 ```{r}
 nzge %>%
@@ -40,6 +40,81 @@ nzge %>%
          prop = round(votes/total*100, 3)) %>%
   
   select(-total, -votes)
+```
+
+### c.Produce a nice table indicating, for each year, which party won the Candidate vote and which party won the Party vote.
+
+```{r}
+nzge %>%
+  group_by(voting_type, election_year, party) %>%
+  summarize(votes = sum(votes)) %>%
+  
+  # find the party with the highest vote count in each election
+  arrange(election_year, voting_type, desc(votes)) %>%
+  slice(1) %>%
+  select(-votes) %>%
+  
+  # reshape the results Candidate and Party appear in separate columns
+  pivot_wider(names_from = voting_type,
+              values_from = party)
+```
+
+## Problem 2-Tidyverse: Tennis
+
+```{r}
+library(tidyverse)
+
+tennis <- read_csv(
+  "https://raw.githubusercontent.com/farhadGithub/tennis-atp-data/main/data/raw/atp_matches_2019.csv"
+)
+```
+### a. How many tournaments took place in 2019?
+
+```{r}
+tournaments <- tennis %>%
+  group_by(tourney_name) %>%
+  summarize() %>%
+  ungroup()
+tournaments %>%
+  nrow()
+
+# check the data
+tournaments %>%
+  filter(str_detect(tourney_name, "Davis Cup")) %>%
+  slice(1:5)
+
+tournaments <- tournaments %>%
+  mutate(tourney_name = str_replace(tourney_name, "Davis.*", "Davis Cup")) %>%
+  group_by(tourney_name) %>%
+  summarize() %>%
+  ungroup()
+tournaments %>%
+  nrow()
+```
+There are only 69 unique tournaments.
+
+## b.Did any player win more than one tournament? If so, how many players won more than one tournament, and how many tournaments did the most winning player(s) win?
+
+```{r}
+winners <- tennis %>%
+  arrange(tourney_name, desc(match_num)) %>%
+  group_by(tourney_name) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(winner_name) %>%
+  group_by(winner_name) %>%
+  summarize(wins = n()) %>%
+  ungroup() %>%
+  arrange(desc(wins)) %>%
+  # identify players who won more than one tournament
+  filter(wins > 1)
+winners %>%
+  nrow()
+```
+There are 17 players who won multiple tournaments.
+
+```{r}
+
 ```
 
 
