@@ -1,0 +1,46 @@
+---
+title: "HW4"
+author: "Ting-Yu Chang"
+format: pdf
+editor: visual
+---
+
+## Problrm 1
+
+```{r}
+library(tidyverse)
+library(nzelect)
+```
+### a.Generate a table (which can just be a nicely printed tibble) of vote count (regardless of party) per year/type. Make sure to sort it by vote count.
+
+```{r}
+nzge %>%
+  group_by(voting_type, election_year) %>%
+  summarize(votes = sum(votes)) %>%
+  ungroup() %>%
+  arrange(desc(votes))
+```
+b. Focus only on the 2014 election. Report the proportion of votes for each party in the Candidate election. Again, produce a nice table and sort it by percent of vote.
+
+```{r}
+nzge %>%
+  
+  # keep only candidate votes from the 2014 election
+  filter(election_year == 2014 & voting_type == "Candidate") %>%
+  
+  # total number of votes for each party
+  group_by(party) %>%
+  summarize(votes = sum(votes)) %>%
+  ungroup() %>%
+  
+  arrange(desc(votes)) %>%
+  
+  # each party's proportion of the total Candidate vote
+  mutate(total = sum(votes),
+         prop = round(votes/total*100, 3)) %>%
+  
+  select(-total, -votes)
+```
+
+
+
