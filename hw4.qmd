@@ -152,6 +152,63 @@ tennis %>%
 ```
 Only one player has the highest win-rate, and it is Rafael Nadal.
 
+## Problem 3 - Visualization
+
+```{r}
+covid <- read.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/refs/heads/master/rolling-averages/us-states.csv")
+str(covid)
+```
+```{r}
+covid$date <- lubridate::ymd(covid$date)
+names(covid)[names(covid) == "date"] <- "Date"
+names(covid)[names(covid) == "state"] <- "State"
+```
+
+### a. How many major and minor spikes in cases were there?
+
+```{r}
+library(ggplot2)
+ggplot(covid, aes(x = Date, y = cases_avg)) +
+  geom_line() +
+  ylab("Average Daily Cases")
+```
+The plot shows approximately four major spikes and three or four smaller spikes.
+
+### b. For the states with the highest and lowest overall rates per population, what differences do you see in their trajectories over time?
+
+```{r}
+# aggregate to the state level
+covid_state <- covid %>%
+  group_by(State) %>%
+  summarize(total = sum(cases_avg_per_100k)) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(covid_state, aes(x = total, y = State, label = State)) +
+  geom_point(aes(color = total == max(total) | total == min(total))) +
+  geom_text(aes(nudge_x = ifelse(total > 37500, -150, 150),
+                hjust = ifelse(total > 37500, 1, 0))) +
+  scale_y_discrete(labels = NULL, breaks = NULL, name = "") +
+  theme(legend.position = "off") +
+  xlab("Total covid cases 01/2020-03/2023")
+```
+Maine and Rhode Island are highest and lowest overall count.
+
+```{r}
+ggplot(covid %>% filter(State == "Maine" | State == "Rhode Island"),
+       aes(x = Date, y = cases_avg_per_100k, color = State)) +
+  geom_line(linewidth = 1.5) +
+  ylab("Covid cases per 100k") +
+  theme(legend.position = "inside", legend.position.inside = c(.9, .9))
+```
+
+
+
+
+
+
+
 
 
 
