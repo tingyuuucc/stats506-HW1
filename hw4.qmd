@@ -129,6 +129,30 @@ Yes, we have statistical significant evidence that winners perform more aces tha
 
 ### d. Identify the player(s) with the highest win-rate. (Note that this is NOT asking for the highest number of wins.) Restrict to players with at least 5 matches.
 
+```{r}
+tennis %>%
+  select(winner_name, loser_name) %>%
+  pivot_longer(everything(),
+               names_to = "outcome",
+               values_to = "player") %>%
+  
+  # whether each player won the match
+  mutate(winner = outcome == "winner_name") %>%
+  # number of matches and win rate for each player
+  group_by(player) %>%
+  summarize(matches = n(),
+            winrate = mean(winner)) %>%
+  ungroup() %>%
+  # players who played at least 5 matches
+  filter(matches >= 5) %>%
+  
+  # sort players from highest to lowest win rate
+  arrange(desc(winrate)) %>%
+  slice(1:2)
+```
+Only one player has the highest win-rate, and it is Rafael Nadal.
+
+
 
 
 
