@@ -193,7 +193,7 @@ ggplot(covid_state, aes(x = total, y = State, label = State)) +
   theme(legend.position = "off") +
   xlab("Total covid cases 01/2020-03/2023")
 ```
-Maine and Rhode Island are highest and lowest overall count.
+Rhode Island has the highest overall case rate, while Maine has the lowest.
 
 ```{r}
 ggplot(covid %>% filter(State == "Maine" | State == "Rhode Island"),
@@ -202,6 +202,86 @@ ggplot(covid %>% filter(State == "Maine" | State == "Rhode Island"),
   ylab("Covid cases per 100k") +
   theme(legend.position = "inside", legend.position.inside = c(.9, .9))
 ```
+Rhode Island generally had higher case rates than Maine and experienced much sharper spikes, particularly around early 2022. Maine's trajectory was comparatively smoother, with smaller peaks throughout most of the pandemic. And the spike in winter 21-22 did not seem to affect Maine, while increasing rates around 10-fold in Rhode Island.
+
+ChatGPT helped me figure out a more briefly way to show my result.
+
+### c. Identify, to the best of your ability without a formal test, the first five states to experience Covid in a substantial way.
+
+```{r}
+covid20 <- covid %>%
+  filter(year(Date) == 2020) %>%
+  select(State, Date, cases_avg_per_100k)
+```
+
+```{r}
+ggplot(covid20, aes(x = Date, y = cases_avg_per_100k, color = State)) +
+  geom_line() +
+  ylab("COVID cases per 100k") +
+  theme(legend.position = "off")
+```
+
+```{r}
+covid20 <- covid20 %>%
+  filter(month(Date) %in% c(3, 4, 5)) # Mar-May
+ggplot(covid20, aes(x = Date, y = cases_avg_per_100k, color = State)) +
+  geom_line() +
+  ylab("COVID cases per 100k")
+```
+
+```{r}
+# that legend is overwhelming, restrict data where the cases above 20
+ggplot(covid20 %>% filter(cases_avg_per_100k > 20),
+       aes(x = Date, y = cases_avg_per_100k, color = State)) +
+  ylab("COVID cases per 100k") +
+  geom_line()
+```
+```{r}
+# states that experienced substantial COVID rates earliest
+topstates <- c(
+  "New York",
+  "New Jersey",
+  "Louisiana",
+  "Guam",
+  "Massachusetts",
+  "Rhode Island"
+)
+
+# assign gray to all states and distinct colors to the selected states
+all_states <- unique(covid20$State)
+
+colors <- rep("lightgrey", length(all_states))
+names(colors) <- all_states
+
+colors[topstates[1]] <- "red"
+colors[topstates[2]] <- "skyblue"
+colors[topstates[3]] <- "green"
+colors[topstates[4]] <- "purple"
+colors[topstates[5]] <- "orange"
+colors[topstates[6]] <- "gold"
+
+# highlight the states with the earliest substantial increases
+ggplot(
+  covid20,
+  aes(x = Date, y = cases_avg_per_100k, color = State)
+) +
+  geom_line() +
+  scale_color_manual(
+    values = colors,
+    breaks = topstates
+  ) +
+  labs(
+    title = "Early COVID-19 Case Trajectories by State",
+    x = "Month of 2020",
+    y = "Average Daily Cases per 100k",
+    color = "State"
+  ) +
+  theme_minimal()
+```
+Based on the early trajectories from March to May 2020, New York, New Jersey, Louisiana, and Guam clearly experienced substantial COVID-19 case rates relatively early. Massachusetts and Rhode Island also showed early increases and are difficult to distinguish as the fifth state, so both are highlighted in the final plot.
+
+
+
 
 
 
