@@ -1,0 +1,97 @@
+---
+title: "Final project proposal"
+author: "TING-YU CHANG"
+format: pdf
+editor: visual
+---
+
+```{r}
+library(haven)
+library(dplyr)
+
+gss <- read_dta("gss7224_r3a.dta") %>%
+  rename_with(tolower)
+
+table(gss$year)
+```
+```{r}
+gss_sub <- gss |> filter(year %in% c(2010, 2012, 2014, 2016, 2018, 2021, 2022, 2024))
+
+table(gss_sub$year, gss_sub$happy, useNA = "ifany")
+table(gss_sub$year, gss_sub$partyid, useNA = "ifany")
+```
+```{r}
+gss_sub |>
+  summarise(across(c(age, sex, race, educ, marital, realinc, region),
+                   ~ mean(is.na(.x))))
+```
+```{r}
+gss_chk <- gss_sub |>
+  filter(partyid %in% 0:6, happy %in% 1:3) |>
+  mutate(
+    party3 = case_when(partyid <= 2 ~ "Dem",
+                       partyid == 3 ~ "Ind",
+                       TRUE ~ "Rep"),
+    inc_miss = is.na(realinc)
+  )
+
+# 各年缺失率
+gss_chk |> group_by(year) |> summarise(miss = mean(inc_miss))
+
+# 各年 × 政黨缺失率
+gss_chk |> group_by(year, party3) |> summarise(miss = mean(inc_miss), .groups = "drop")
+
+# 缺失者與非缺失者的 very happy 比例
+gss_chk |> group_by(inc_miss) |> summarise(very_happy = mean(happy == 1))
+```
+```{r}
+gss_sub |>
+  group_by(year) |>
+  summarise(
+    n            = n(),
+    wtssps_ok    = mean(!is.na(wtssps)),
+    wtssnrps_ok  = mean(!is.na(wtssnrps)),
+    wtssall_ok   = mean(!is.na(wtssall)),
+    wtssps_mean  = mean(wtssps, na.rm = TRUE),
+    wtssnrps_mean = mean(wtssnrps, na.rm = TRUE)
+  )
+```
+```{r}
+gss_sub |>
+  summarise(
+    cor_w   = cor(wtssps, wtssnrps, use = "complete.obs"),
+    n_diff  = sum(abs(wtssps - wtssnrps) > 1e-6, na.rm = TRUE)
+  )
+```
+
+```{r}
+gss_sub |>
+  group_by(year) |>
+  summarise(
+    cor_w  = cor(wtssps, wtssnrps, use = "complete.obs"),
+    pct_diff = mean(abs(wtssps - wtssnrps) > 1e-6, na.rm = TRUE)
+  )
+```
+```{r}
+gss_sub |>
+  group_by(year) |>
+  summarise(vpsu_ok = mean(!is.na(vpsu)), vstrat_ok = mean(!is.na(vstrat)))
+```
+
+```{r}
+gss_sub |>
+  group_by(year) |>
+  summarise(n_strata = n_distinct(vstrat),
+            n_psu    = n_distinct(vpsu),
+            n_cells  = n_distinct(paste(vstrat, vpsu)))
+```
+
+
+
+
+
+
+
+
+
+
