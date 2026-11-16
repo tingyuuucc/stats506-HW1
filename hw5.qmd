@@ -67,8 +67,205 @@ makeCI <- function(level,
 
 'show' method
 ```{r}
+# calculate the lower and upper CI bounds
+.getBounds <- function(ci) {
+  z <- qnorm((1 + ci@level)/2)
+  lb <- ci@mean - z*ci@sterr
+  ub <- ci@mean + z*ci@sterr
+  return(c(lb, ub))
+}
 
+# show method for waldCI object
+setMethod("show", "waldCI", function(object) {
+  bound <- .getBounds(object)
+  cat(round(object@level*100))
+  cat("% CI: (")
+  cat(bound[1])
+  cat(", ")
+  cat(bound[2])
+  cat(")\n")
+  return(invisible(object))
+})
 ```
+
+Accessors:
+
+```{r}
+# get values from the object
+.getSlot <- function(object, slotname) {
+  if (slotname %in% c("level", "mean", "sterr")) {
+    return(slot(object, slotname))
+  }
+  
+  # calculate bounds when lb or ub is requested
+  bounds <- .getBounds(object)
+  if (slotname == "lb") {
+    return(bounds[1])
+  } else if (slotname == "ub") {
+    return(bounds[2])
+  } else {
+    stop("Invalid slotname")
+  }
+}
+
+# define the level generic
+setGeneric("level", function(object) {
+  standardGeneric("level")
+})
+```
+```{r}
+# define the level method for waldCI objects
+setMethod("level", "waldCI", function(object) .getSlot(object, "level"))
+
+# define the mean method for waldCI objects
+mean.waldCI <- function(x, ...) .getSlot(x, "mean")
+
+# define a generic function for sterr()
+setGeneric("sterr", function(object) {
+  standardGeneric("sterr")
+})
+```
+```{r}
+# define the sterr method for waldCI objects
+setMethod("sterr", "waldCI", function(object) .getSlot(object, "level"))
+
+# define a generic function for lb
+setGeneric("lb", function(object) {
+  standardGeneric("lb")
+})
+```
+```{r}
+# define the lb method for waldCI objects
+setMethod("lb", "waldCI", function(object) .getSlot(object, "lb"))
+
+# define a generic function for ub
+setGeneric("ub", function(object) {
+  standardGeneric("ub")
+})
+```
+```{r}
+setMethod("ub", "waldCI", function(object) .getSlot(object, "ub"))
+```
+
+Setters:
+
+```{r}
+# define the level setter generic
+setGeneric("level<-", function(object, value) {
+  standardGeneric("level<-")
+})
+```
+```{r}
+# define the level setter for waldCI objects
+setMethod("level<-", "waldCI", function(object, value) {
+  return(makeCI(level = value,
+                mean = object@mean,
+                sterr = object@sterr))
+})
+
+# define the mean setter generic
+setGeneric("mean<-", function(object, value) {
+  standardGeneric("mean<-")
+})
+```
+```{r}
+setMethod("mean<-", "waldCI", function(object, value) {
+  return(makeCI(level = object@level,
+                mean = value,
+                sterr = object@sterr))
+})
+
+setGeneric("sterr<-", function(object, value) {
+  standardGeneric("sterr<-")
+})
+```
+```{r}
+setMethod("sterr<-", "waldCI", function(object, value) {
+  return(makeCI(level = object@level,
+                mean = object@mean,
+                sterr = value))
+})
+
+setGeneric("lb<-", function(object, value) {
+  standardGeneric("lb<-")
+})
+```
+```{r}
+setMethod("lb<-", "waldCI", function(object, value) {
+  return(makeCI(level = object@level,
+                lb = value,
+                ub = .getBounds(object)[2]))
+})
+
+setGeneric("ub<-", function(object, value) {
+  standardGeneric("ub<-")
+})
+```
+```{r}
+setMethod("ub<-", "waldCI", function(object, value) {
+  return(makeCI(level = object@level,
+                lb = .getBounds(object)[2],
+                ub = value))
+})
+```
+
+contains and overlaps
+```{r}
+# check whether a value is inside the CI
+contains <- function(ci, value) {
+  stopifnot(is.numeric(value))
+  stopifnot(length(value) == 1)
+  bounds <- .getBounds(ci)
+  return(value > bounds[1] & value < bounds[2])
+}
+
+# check whether two CI overlap
+overlap <- function(ci1, ci2) {
+  b1 <- .getBounds(ci1)
+  b2 <- .getBounds(ci2)
+  return(max(b1[1], b2[1]) <= min(b1[2], b2[2]))
+}
+```
+
+as.numeric:
+```{r}
+# covert waldCI to numeric
+setGeneric("as.numeric")
+```
+
+```{r}
+setMethod("as.numeric", "waldCI", function(x) {
+  return(.getBounds(x))
+})
+```
+
+transform:
+
+```{r}
+# apply a monotonic transformation to a `waldCI`
+transformCI <- function(ci, fn) {
+  stopifnot(is.function(fn))
+  stopifnot(is(ci, "waldCI"))
+  return(makeCI(level = ci@level,
+                mean = fn(ci@mean),
+                sterr = fn(ci@sterr)))
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
