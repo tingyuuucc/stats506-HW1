@@ -1,0 +1,35 @@
+---
+title: "HW5"
+author: "Ting-Yu Chang"
+format: pdf
+editor: visual
+---
+
+## Problem 1 - OOP Programming
+
+### (a) For the waldCI class, define the following:
+
+```{r}
+# define the waldCI class
+setClass("waldCI",
+          slots = c(level = "numeric",
+                    mean = "numeric",
+                    sterr = "numeric"))
+
+# check waldCI objects have valid calues
+setValidity("waldCI", function(object){
+  if(object@level <= 0 | object@level >= 1) {
+    stop("level must be in (0, 1)")
+  }
+  if(object@sterr <= 0) {
+    stop("stderr must be positive")
+  }
+  if(!is.finite(object@sterr)) {
+    stop("Infinite CI not supported")
+  }
+  return(TRUE)
+})
+```
+
+
+
