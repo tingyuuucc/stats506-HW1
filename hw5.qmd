@@ -318,7 +318,9 @@ sterr(ci1) <- Inf
 
 ```{r}
 library(data.table)
-tennis_dt <- as.data.table(copy(tennis))
+tennis_dt <- fread(
+  "https://raw.githubusercontent.com/farhadGithub/tennis-atp-data/main/data/raw/atp_matches_2019.csv"
+)
 ```
 
 ### (a) How many tournaments took place in 2019?
