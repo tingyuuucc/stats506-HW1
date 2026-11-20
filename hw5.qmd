@@ -282,6 +282,7 @@ mean(transformCI(ci2, log))
 ### (c) Show that your validator does not allow the creation of invalid confidence intervals:
 
 ```{r}
+#| error: true
 # negative standard error
 makeCI(.9, mean = 3, sterr = -2)
 ```
@@ -291,11 +292,13 @@ makeCI(.9, lb = 5, ub = 2)
 ```
 
 ```{r}
+#| error: true
 # infinite bounds
 makeCI(.9, lb = 2, ub = Inf)
 ```
 
 ```{r}
+#| error: true
 # invalid use of setters
 mean(ci1) <- "a"
 lb(ci1) <- 30
