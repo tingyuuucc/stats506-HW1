@@ -283,28 +283,23 @@ mean(transformCI(ci2, log))
 
 ```{r}
 #| error: true
+
 # negative standard error
 makeCI(.9, mean = 3, sterr = -2)
-```
-```{r}
+
 # lower bound greater than upper bound
 makeCI(.9, lb = 5, ub = 2)
-```
 
-```{r}
-#| error: true
 # infinite bounds
 makeCI(.9, lb = 2, ub = Inf)
-```
 
-```{r}
-#| error: true
 # invalid use of setters
 mean(ci1) <- "a"
 lb(ci1) <- 30
 sterr(ci1) <- -2
 sterr(ci1) <- Inf
 ```
+
 ## Problem 2 - data.table
 ```{r}
 library(data.table)
