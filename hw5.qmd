@@ -1,7 +1,9 @@
 ---
 title: "HW5"
 author: "Ting-Yu Chang"
-format: pdf
+format: 
+  html:
+    embed-resources: true
 editor: visual
 ---
 
@@ -428,6 +430,9 @@ Rafael Nadal had the highest win rate among players who played at least five mat
 ## Problem 3 - plotly
 
 ```{r}
+#| fig-width: 7
+#| fig-height: 5
+#| out-width: 100%
 library(plotly)
 covid <- read.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/refs/heads/master/rolling-averages/us-states.csv")
 covid$date <- lubridate::ymd(covid$date)
@@ -436,6 +441,9 @@ names(covid)[names(covid) == "state"] <- "State"
 ```
 
 ```{r}
+#| fig-width: 7
+#| fig-height: 5
+#| out-width: 100%
 plot_ly(covid, x = ~ Date, y = ~ cases_avg, type = "scatter",
         mode = "lines") %>%
   layout(yaxis = list(title = "Daily Cases"))
@@ -444,6 +452,9 @@ plot_ly(covid, x = ~ Date, y = ~ cases_avg, type = "scatter",
 ### (a) How many major and minor spikes in cases were there?
 
 ```{r}
+#| fig-width: 7
+#| fig-height: 5
+#| out-width: 100%
 plot_ly(covid, x = ~ Date, y = ~ cases_avg, type = "scatter",
         mode = "lines") %>%
   layout(yaxis = list(title = "Daily Cases"))
@@ -454,6 +465,9 @@ The plot shows approximately four major spikes and three or four smaller spikes.
 ### (b) For the states with the highest and lowest overall rates per population, what differences do you see in their trajectories over time?
 
 ```{r}
+#| fig-width: 7
+#| fig-height: 5
+#| out-width: 100%
 library(dplyr)
 covid_state <- covid %>%
   group_by(State) %>%
@@ -491,6 +505,9 @@ Rhode Island has the highest overall case rate, while Maine has the lowest.
 ### (c) Identify, to the best of your ability without a formal test, the first five states to experience Covid in a substantial way.
 
 ```{r}
+#| fig-width: 7
+#| fig-height: 5
+#| out-width: 100%
 library(lubridate)
 
 # restrict to Mar–May 2020
