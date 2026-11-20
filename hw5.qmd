@@ -281,6 +281,107 @@ mean(transformCI(ci2, log))
 ```
 ### (c) Show that your validator does not allow the creation of invalid confidence intervals:
 
+```{r}
+# negative standard error
+makeCI(.9, mean = 3, sterr = -2)
+```
+```{r}
+# lower bound greater than upper bound
+makeCI(.9, lb = 5, ub = 2)
+```
+
+```{r}
+# infinite bounds
+makeCI(.9, lb = 2, ub = Inf)
+```
+
+```{r}
+# invalid use of setters
+mean(ci1) <- "a"
+lb(ci1) <- 30
+sterr(ci1) <- -2
+sterr(ci1) <- Inf
+```
+## Problem 2 - data.table
+```{r}
+library(data.table)
+tennis_dt <- as.data.table(copy(tennis))
+```
+
+### (a) How many tournaments took place in 2019?
+
+```{r}
+# combine all Davis Cup matches under one tournament name
+tennis_dt[, tourney_name2 := fifelse(
+  grepl("^Davis", tourney_name),
+  "Davis Cup",
+  tourney_name
+)]
+
+# count unique tournaments
+tournaments <- unique(tennis_dt[, .(tourney_name2)])
+
+nrow(tournaments)
+```
+There were 69 unique tournaments in 2019.
+
+### (b) Did any player win more than one tournament? If so, how many players won more than one tournament, and how many tournaments did the most winning player(s) win?
+```{r}
+# count tournament wins for each player
+winners <- tennis_dt[
+  round == "F",
+  .(wins = .N),
+  by = winner_name
+][
+  wins > 1
+][
+  order(-wins)
+]
+
+# number of players who won more than one tournament
+nrow(winners)
+
+# player(s) with the most tournament wins
+winners[wins == max(wins)]
+```
+Yes. 12 players won more than one tournament. Novak Djokovic and Dominic Thiem had the most tournament wins, with 5 each.
+
+### (c) Do winners have more aces than losers?
+```{r}
+# check whether the winner had more aces in each match
+ace_stats <- tennis_dt[
+  ,
+  .(win_more = w_ace > l_ace)
+][
+  !is.na(win_more),
+  .(
+    x = sum(win_more),
+    n = .N
+  )
+]
+
+ace_stats
+```
+```{r}
+prop.test(
+  ace_stats$x,
+  ace_stats$n,
+  p = 0.5
+)
+```
+There is statistically significant evidence that winners have more aces than losers in more than half of the matches.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
