@@ -252,6 +252,37 @@ transformCI <- function(ci, fn) {
 }
 ```
 
+### (b) Use your waldCI class to create three objects:
+
+```{r}
+ci1 <- makeCI(.95, 17.2, 24.7)
+ci2 <- makeCI(.99, mean = 13, sterr = 2.5)
+ci3 <- makeCI(0.75, 27.43, 39.22)
+ci1
+ci2
+ci3
+as.numeric(ci1)
+as.numeric(ci2)
+as.numeric(ci3)
+lb(ci2)
+ub(ci2)
+mean(ci1)
+sterr(ci3)
+level(ci2)
+lb(ci2) <- 10.5
+mean(ci3) <- 34
+level(ci3) <- .8
+contains(ci1, 17)
+contains(ci3, 44)
+overlap(ci1, ci2)
+eci1 <- transformCI(ci1, sqrt)
+eci1
+mean(transformCI(ci2, log))
+```
+### (c) Show that your validator does not allow the creation of invalid confidence intervals:
+
+
+
 
 
 
