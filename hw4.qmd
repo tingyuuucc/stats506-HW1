@@ -11,6 +11,7 @@ editor: visual
 library(tidyverse)
 library(nzelect)
 ```
+
 ### a.Generate a table (which can just be a nicely printed tibble) of vote count (regardless of party) per year/type. Make sure to sort it by vote count.
 
 ```{r}
@@ -20,6 +21,7 @@ nzge %>%
   ungroup() %>%
   arrange(desc(votes))
 ```
+
 ### b. Focus only on the 2014 election. Report the proportion of votes for each party in the Candidate election. Again, produce a nice table and sort it by percent of vote.
 
 ```{r}
@@ -68,6 +70,7 @@ tennis <- read_csv(
   "https://raw.githubusercontent.com/farhadGithub/tennis-atp-data/main/data/raw/atp_matches_2019.csv"
 )
 ```
+
 ### a. How many tournaments took place in 2019?
 
 ```{r}
@@ -91,6 +94,7 @@ tournaments <- tournaments %>%
 tournaments %>%
   nrow()
 ```
+
 There are only 69 unique tournaments.
 
 ## b.Did any player win more than one tournament? If so, how many players won more than one tournament, and how many tournaments did the most winning player(s) win?
@@ -114,6 +118,7 @@ winners %>%
 winners %>%
   slice(1:2)
 ```
+
 There are 17 players who won multiple tournaments. And Rafael Nadal won the most, 9 tournaments.
 
 ### c. Is there any evidence that winners have more aces than losers? (If you address this with a hypothesis test, do not use base R functionality - continue to remain in the Tidyverse.)
@@ -125,6 +130,7 @@ tennis %>%
   mutate(win_more = w_ace > l_ace) %>%
   prop_test(win_more ~ NULL, p = 0.5)
 ```
+
 Yes, we have statistical significant evidence that winners perform more aces than losers.
 
 ### d. Identify the player(s) with the highest win-rate. (Note that this is NOT asking for the highest number of wins.) Restrict to players with at least 5 matches.
@@ -150,6 +156,7 @@ tennis %>%
   arrange(desc(winrate)) %>%
   slice(1:2)
 ```
+
 Only one player has the highest win-rate, and it is Rafael Nadal.
 
 ## Problem 3 - Visualization
@@ -158,6 +165,7 @@ Only one player has the highest win-rate, and it is Rafael Nadal.
 covid <- read.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/refs/heads/master/rolling-averages/us-states.csv")
 str(covid)
 ```
+
 ```{r}
 covid$date <- lubridate::ymd(covid$date)
 names(covid)[names(covid) == "date"] <- "Date"
@@ -172,6 +180,7 @@ ggplot(covid, aes(x = Date, y = cases_avg)) +
   geom_line() +
   ylab("Average Daily Cases")
 ```
+
 The plot shows approximately four major spikes and three or four smaller spikes.
 
 ### b. For the states with the highest and lowest overall rates per population, what differences do you see in their trajectories over time?
@@ -193,6 +202,7 @@ ggplot(covid_state, aes(x = total, y = State, label = State)) +
   theme(legend.position = "off") +
   xlab("Total covid cases 01/2020-03/2023")
 ```
+
 Rhode Island has the highest overall case rate, while Maine has the lowest.
 
 ```{r}
@@ -202,6 +212,7 @@ ggplot(covid %>% filter(State == "Maine" | State == "Rhode Island"),
   ylab("Covid cases per 100k") +
   theme(legend.position = "inside", legend.position.inside = c(.9, .9))
 ```
+
 Rhode Island generally had higher case rates than Maine and experienced much sharper spikes, particularly around early 2022. Maine's trajectory was comparatively smoother, with smaller peaks throughout most of the pandemic. And the spike in winter 21-22 did not seem to affect Maine, while increasing rates around 10-fold in Rhode Island.
 
 ChatGPT helped me figure out a more briefly way to show my result.
@@ -236,6 +247,7 @@ ggplot(covid20 %>% filter(cases_avg_per_100k > 20),
   ylab("COVID cases per 100k") +
   geom_line()
 ```
+
 ```{r}
 # states that experienced substantial COVID rates earliest
 topstates <- c(
@@ -278,18 +290,5 @@ ggplot(
   ) +
   theme_minimal()
 ```
+
 Based on the early trajectories from March to May 2020, New York, New Jersey, Louisiana, and Guam clearly experienced substantial COVID-19 case rates relatively early. Massachusetts and Rhode Island also showed early increases and are difficult to distinguish as the fifth state, so both are highlighted in the final plot.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
