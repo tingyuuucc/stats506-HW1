@@ -1,7 +1,9 @@
 ---
 title: "HW5"
 author: "Ting-Yu Chang"
-format: pdf
+format: 
+  html:
+    embed-resources: true
 editor: visual
 ---
 
