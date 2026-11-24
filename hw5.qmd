@@ -442,16 +442,17 @@ tennis_dt <- fread(
 
 ```{r}
 # combine all Davis Cup matches under one tournament name
-tennis_dt[, tourney_name2 := fifelse(
-  grepl("^Davis", tourney_name),
-  "Davis Cup",
-  tourney_name
-)]
+tennis_dt[
+  ,
+  tournament := fifelse(
+    grepl("^Davis", tourney_name),
+    "Davis Cup",
+    tourney_name
+  )
+]
 
 # count unique tournaments
-tournaments <- unique(tennis_dt[, .(tourney_name2)])
-
-nrow(tournaments)
+uniqueN(tennis_dt$tournament)
 ```
 
 There were 69 unique tournaments in 2019.
@@ -460,21 +461,21 @@ There were 69 unique tournaments in 2019.
 
 ```{r}
 # count tournament wins for each player
-winners <- tennis_dt[
+champion <- tennis_dt[
   round == "F",
-  .(wins = .N),
+  .(titles = .N),
   by = winner_name
 ][
-  wins > 1
+  titles > 1
 ][
-  order(-wins)
+  order(-titles)
 ]
 
-# number of players who won more than one tournament
-nrow(winners)
+# number of players with multiple titles
+nrow(champion)
 
-# player(s) with the most tournament wins
-winners[wins == max(wins)]
+# Player(s) with the most titles
+champion[titles == max(titles)]
 ```
 
 Yes. 12 players won more than one tournament. Novak Djokovic and Dominic Thiem had the most tournament wins, with 5 each.
@@ -482,48 +483,73 @@ Yes. 12 players won more than one tournament. Novak Djokovic and Dominic Thiem h
 ### (c) Do winners have more aces than losers?
 
 ```{r}
-# check whether the winner had more aces in each match
-ace_stats <- tennis_dt[
-  ,
-  .(win_more = w_ace > l_ace)
-][
-  !is.na(win_more),
-  .(
-    x = sum(win_more),
-    n = .N
-  )
+# ace difference within each match
+ace_diff <- tennis_dt[
+  !is.na(w_ace) & !is.na(l_ace),
+  w_ace - l_ace
 ]
 
-ace_stats
+# mean difference
+obs_diff <- mean(ace_diff)
+
+obs_diff
 ```
 
 ```{r}
-prop.test(
-  ace_stats$x,
-  ace_stats$n,
-  p = 0.5
+set.seed(506)
+
+a <- 5000
+
+# randomly flip winner/loser labels within each match
+perm_diff <- replicate(
+  a,
+  mean(
+    ace_diff *
+      sample(c(-1, 1),
+             length(ace_diff),
+             replace = TRUE)
+  )
 )
+
+# one-sided p-value
+p_value <- (
+  sum(perm_diff >= obs_diff) + 1
+) / (a + 1)
+
+p_value
 ```
 
-There is statistically significant evidence that winners have more aces than losers in more than half of the matches.
+The test provides evidence that winners have more aces than losers on average.
 
 ### (d) Identify the player(s) with the highest win-rate. (Note that this is NOT asking for the highest number of wins.) Restrict to players with at least 5 matches.
 
 ```{r}
-# put winners and losers into one player column
-players <- tennis_dt[
-  ,
-  .(
-    player = c(winner_name, loser_name),
-    winner = c(rep(TRUE, .N), rep(FALSE, .N))
+# create one row for every player appearance
+players <- rbindlist(
+  list(
+    tennis_dt[
+      ,
+      .(
+        player = winner_name,
+        win = 1L
+      )
+    ],
+    tennis_dt[
+      ,
+      .(
+        player = loser_name,
+        win = 0L
+      )
+    ]
   )
-]
-# calculate matches played and win rate for each player
+)
+
+# calculate matches and win rate
 winrates <- players[
   ,
   .(
     matches = .N,
-    winrate = mean(winner)
+    winrate = mean(win)
   ),
   by = player
 ][
@@ -532,12 +558,9 @@ winrates <- players[
   order(-winrate)
 ]
 
-winrates
-
-# find the player(s) with the highest win rate
+# players with the highest win rate
 winrates[winrate == max(winrate)]
 ```
-
 Rafael Nadal had the highest win rate among players who played at least five matches, with a win rate of approximately 87%.
 
 ## Problem 3 - plotly
@@ -546,20 +569,26 @@ Rafael Nadal had the highest win rate among players who played at least five mat
 #| fig-width: 7
 #| fig-height: 5
 #| out-width: 100%
+library(dplyr)
 library(plotly)
+library(lubridate)
+
 covid <- read.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/refs/heads/master/rolling-averages/us-states.csv")
-covid$date <- lubridate::ymd(covid$date)
+
+covid$date <- ymd(covid$date)
+
 names(covid)[names(covid) == "date"] <- "Date"
 names(covid)[names(covid) == "state"] <- "State"
 ```
 
 ```{r}
-#| fig-width: 7
-#| fig-height: 5
-#| out-width: 100%
-plot_ly(covid, x = ~ Date, y = ~ cases_avg, type = "scatter",
-        mode = "lines") %>%
-  layout(yaxis = list(title = "Daily Cases"))
+# state-level averages to get the national daily average
+covid_us <- covid %>%
+  group_by(Date) %>%
+  summarize(
+    cases = sum(cases_avg, na.rm = TRUE),
+    .groups = "drop"
+  )
 ```
 
 ### (a) How many major and minor spikes in cases were there?
@@ -567,13 +596,30 @@ plot_ly(covid, x = ~ Date, y = ~ cases_avg, type = "scatter",
 ```{r}
 #| fig-width: 7
 #| fig-height: 5
-#| out-width: 100%
-plot_ly(covid, x = ~ Date, y = ~ cases_avg, type = "scatter",
-        mode = "lines") %>%
-  layout(yaxis = list(title = "Daily Cases"))
+plot_ly(
+  covid_us,
+  x = ~Date,
+  y = ~cases,
+  type = "scatter",
+  mode = "lines",
+  fill = "tozeroy",
+  line = list(width = 1.5),
+  hovertemplate = paste(
+    "Date: %{x}",
+    "<br>Average daily cases: %{y:,.0f}",
+    "<extra></extra>"
+  )
+) %>%
+  layout(
+    title = "COVID-19 Cases in the United States",
+    xaxis = list(title = "Date"),
+    yaxis = list(title = "Average Daily Cases"),
+    showlegend = FALSE
+  )
 ```
+There are about four major spikes in the national COVID-19 case trend and several smaller spikes. The largest spike occurred in early 2022, while other major increases appeared around late 2020, late 2021, and mid-2022.
 
-The plot shows approximately four major spikes and three or four smaller spikes.
+ChatGPT helped me figure out a more briefly way to show my result.
 
 ### (b) For the states with the highest and lowest overall rates per population, what differences do you see in their trajectories over time?
 
@@ -581,38 +627,66 @@ The plot shows approximately four major spikes and three or four smaller spikes.
 #| fig-width: 7
 #| fig-height: 5
 #| out-width: 100%
-library(dplyr)
-covid_state <- covid %>%
+# calculate an overall case-rate measure for each state
+state_rate <- covid %>%
   group_by(State) %>%
-  summarize(total = sum(cases_avg_per_100k)) %>%
-  arrange(desc(total))
-
-bottom_state <- covid_state$State[1]
-top_state    <- covid_state$State[nrow(covid_state)]
-
-# join totals + order factor so legend is sorted by total
-covid2 <- covid %>%
-  inner_join(covid_state, by = "State") %>%
-  mutate(State = factor(State, levels = covid_state$State))
-
-library(viridis) # for better color management
-
-# one trace per State
-p <- plot_ly(covid2, x = ~ Date, y = ~ cases_avg_per_100k,
-             color = ~ State, colors = viridis(length(unique(covid2$State))),
-             type  = "scatter", mode  = "lines"
-) %>%
-  layout(yaxis = list(title = "COVID cases per 100k"))
-
-# hide all but top/bottom by default
-all_states <- levels(covid2$State)
-hide_idx   <- which(!(all_states %in% c(top_state, bottom_state)))
-
-p <- style(p, visible = "legendonly", traces = hide_idx)
-
-p
+  summarize(
+    overall_rate =
+      sum(cases_avg_per_100k, na.rm = TRUE),
+    .groups = "drop"
+  )
 ```
 
+```{r}
+highest_state <- 
+  state_rate$State[
+    which.max(state_rate$overall_rate)
+  ]
+
+lowest_state <- state_rate$State[
+    which.min(state_rate$overall_rate)
+  ]
+
+highest_state
+lowest_state
+```
+
+```{r}
+compare_data <- covid %>%
+  filter(
+    State %in%
+      c(highest_state, lowest_state)
+  )
+```
+
+```{r}
+plot_ly(
+  compare_data,
+  x = ~Date,
+  y = ~cases_avg_per_100k,
+  color = ~State,
+  type = "scatter",
+  mode = "lines",
+  hovertemplate = paste(
+    "%{fullData.name}",
+    "<br>Date: %{x}",
+    "<br>Cases per 100k: %{y:.1f}",
+    "<extra></extra>"
+  )
+) %>%
+  layout(
+    title = "COVID-19 Case Rates: Highest vs. Lowest Overall State",
+    xaxis = list(title = "Date"),
+    yaxis = list(
+      title = "Average Daily Cases per 100k"
+    ),
+    legend = list(
+      orientation = "h",
+      x = 0.25,
+      y = 1.1
+    )
+  )
+```
 Rhode Island has the highest overall case rate, while Maine has the lowest.
 
 ### (c) Identify, to the best of your ability without a formal test, the first five states to experience Covid in a substantial way.
@@ -621,62 +695,55 @@ Rhode Island has the highest overall case rate, while Maine has the lowest.
 #| fig-width: 7
 #| fig-height: 5
 #| out-width: 100%
-library(lubridate)
+# find when each state first crossed 20 cases per 100k
+first_sub <- covid %>%
+  filter(
+    Date >= as.Date("2020-03-01"),
+    Date <= as.Date("2020-05-31"),
+    cases_avg_per_100k >= 20
+  ) %>%
+  group_by(State) %>%
+  slice_min(
+    order_by = Date,
+    n = 1,
+    with_ties = FALSE
+  ) %>%
+  ungroup() %>%
+  arrange(Date) %>%
+  slice_head(n = 5)
 
-# restrict to Mar–May 2020
-topstates <- c("New York", "New Jersey", "Louisiana",
-               "Guam", "Massachusetts", "Rhode Island")
-
-highlight_cols <- c(
-  "New York"      = "red",
-  "New Jersey"    = "blue",
-  "Louisiana"     = "green",
-  "Guam"          = "purple",
-  "Massachusetts" = "orange",
-  "Rhode Island"  = "yellow"
-)
-
-p <- add_lines(
-  p,
-  data = covid %>% filter(!(State %in% topstates)),
-  x = ~Date,
-  y = ~cases_avg_per_100k,
-  split = ~State,
-  line = list(color = "lightgrey"),
-  showlegend = FALSE,
-  hoverinfo = "none"
-)
-
-# highlighted early-spike states
-for (s in topstates) {
-  p <- add_lines(
-    p,
-    data = covid %>% filter(State == s),
-    x = ~Date,
-    y = ~cases_avg_per_100k,
-    name = s,
-    line = list(color = highlight_cols[s]),
-    hoverinfo = "text",
-    text = ~paste(
+first_sub <- first_sub %>%
+  mutate(
+    State = factor(
       State,
-      "<br>Date:", Date,
-      "<br>Cases/100k:", round(cases_avg_per_100k, 1)
+      levels = rev(State)
     )
   )
-}
 
-# start zoomed on early 2020, but keep full range available
-p <- layout(
-  p,
-  xaxis = list(
-    title = "Date",
-    range = c(as.Date("2020-03-01"), as.Date("2020-05-31"))
+plot_ly(
+  first_sub,
+  x = ~Date,
+  y = ~State,
+  type = "scatter",
+  mode = "markers",
+  marker = list(size = 13),
+  text = ~paste(
+    State,
+    "<br>First date above 20/100k:",
+    Date,
+    "<br>Rate:",
+    round(cases_avg_per_100k, 1)
   ),
-  yaxis = list(
-    title = "COVID cases per 100k",
-    range = c(0, 55)
+  hoverinfo = "text"
+) %>%
+  layout(
+    title =
+      "Earliest States to Reach Substantial COVID-19 Case Rates",
+    xaxis = list(
+      title = "First Date Above 20 Cases per 100k"
+    ),
+    yaxis = list(title = ""),
+    showlegend = FALSE
   )
-)
-
-p
 ```
+Using 20 average daily cases per 100,000 as a visual guideline for a substantial outbreak, the first 5 places to reach this level were New York, New Jersey, Louisiana, Connecticut, and Guam. New York reached this threshold first, followed by New Jersey and Louisiana, while Connecticut and Guam crossed it in early April 2020.
