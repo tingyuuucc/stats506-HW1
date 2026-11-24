@@ -140,7 +140,7 @@ setValidity("waldCI", function(object) {
 'show' method
 
 ```{r}
-# show method for waldCI object
+# show method for waldCI objects
 setMethod("show", "waldCI", function(object) {
 
   cat(
@@ -160,146 +160,90 @@ setMethod("show", "waldCI", function(object) {
 Accessors:
 
 ```{r}
-# lower bound
-setGeneric("lb", function(object) {
-  standardGeneric("lb")
-})
-
-setMethod("lb", "waldCI", function(object) {
+# the lower bound
+lb <- function(object) {
   object@bounds[1]
-})
+}
 
-
-# upper bound
-setGeneric("ub", function(object) {
-  standardGeneric("ub")
-})
-
-setMethod("ub", "waldCI", function(object) {
+# the upper bound
+ub <- function(object) {
   object@bounds[2]
-})
+}
 
-
-# confidence level
-setGeneric("level", function(object) {
-  standardGeneric("level")
-})
-
-setMethod("level", "waldCI", function(object) {
+# the confidence level
+level <- function(object) {
   object@level
-})
+}
 
-
-# standard error
-setGeneric("sterr", function(object) {
-  standardGeneric("sterr")
-})
-
-setMethod("sterr", "waldCI", function(object) {
+# the standard error
+sterr <- function(object) {
   object@sterr
-})
+}
 
-
-# mean is the midpoint of the interval
+# the midpoint of the interval
 mean.waldCI <- function(x, ...) {
   mean(x@bounds)
 }
-
-```
-
-```{r}
-# define the sterr method for waldCI objects
-setMethod("sterr", "waldCI", function(object) .getSlot(object, "level"))
-
-# define a generic function for lb
-setGeneric("lb", function(object) {
-  standardGeneric("lb")
-})
 ```
 
 Setters:
 
 ```{r}
 # update confidence level
-setGeneric("level<-", function(object, value) {
-  standardGeneric("level<-")
-})
-
-setMethod("level<-", "waldCI", function(object, value) {
+`level<-` <- function(object, value) {
 
   makeCI(
     level = value,
     mean = mean(object),
     sterr = sterr(object)
   )
-})
+}
 
 
 # update mean
-setGeneric("mean<-", function(object, value) {
-  standardGeneric("mean<-")
-})
-
-setMethod("mean<-", "waldCI", function(object, value) {
+`mean<-` <- function(object, value) {
 
   makeCI(
     level = level(object),
     mean = value,
     sterr = sterr(object)
   )
-})
+}
+
 
 # update standard error
-setGeneric("sterr<-", function(object, value) {
-  standardGeneric("sterr <-")
-})
-
-setMethod("sterr<-", "waldCI", function(object, value) {
+`sterr<-` <- function(object, value) {
 
   makeCI(
     level = level(object),
     mean = mean(object),
     sterr = value
   )
-})
+}
 
 
 # update lower bound
-setGeneric(
-  "lb<-",
-  function(object, value) standardGeneric("lb<-")
-)
+`lb<-` <- function(object, value) {
 
-setMethod(
-  "lb<-",
-  "waldCI",
-  function(object, value) {
-    makeCI(
-      level = level(object),
-      lb = value,
-      ub = ub(object)
-    )
-  }
-)
+  makeCI(
+    level = level(object),
+    lb = value,
+    ub = ub(object)
+  )
+}
+
 
 # update upper bound
-setGeneric(
-  "ub<-",
-  function(object, value) standardGeneric("ub<-")
-)
+`ub<-` <- function(object, value) {
 
-setMethod(
-  "ub<-",
-  "waldCI",
-  function(object, value) {
-    makeCI(
-      level = level(object),
-      lb = lb(object),
-      ub = value
-    )
-  }
-)
+  makeCI(
+    level = level(object),
+    lb = lb(object),
+    ub = value
+  )
+}
 ```
+
 contains and overlaps
 
 ```{r}
