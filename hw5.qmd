@@ -349,7 +349,6 @@ eci1 <- transformCI(ci1, sqrt)
 eci1
 mean(transformCI(ci2, log))
 ```
-
 ### (c) Show that your validator does not allow the creation of invalid confidence intervals:
 
 ```{r}
